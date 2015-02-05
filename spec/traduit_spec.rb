@@ -1,6 +1,11 @@
 describe Traduit do
+  let(:translate_key) { 'foo.bar' }
+  let(:key) { 'bar' }
+  let(:params) { { key: :value } }
+
   describe '.backends' do
     let(:backends) { {} }
+
     subject { described_class.backends }
 
     context 'when empty backend' do
@@ -21,14 +26,40 @@ describe Traduit do
     end
   end
 
+  describe '.traduit(options, &block)' do
+    let(:backend) { double(:backend) }
+    let(:block) { ->(instance) { instance.object_id } }
+    let(:namespace) { 'namespace2' }
+    let(:scope) { [:foo, :bar ] }
+    let(:new_options) { { namespace: namespace } }
+    let(:options) { { namespace: 'namespace' } }
+    let(:instance) { klass.new }
+
+    before { described_class.backend = backend }
+
+    let(:klass) { build_translatable_class(options, ['foo']) }
+
+    subject { instance.t(key, params) }
+
+    it { expect(klass).to respond_to(:traduit) }
+
+    context 'when we overwrite the options' do
+      before do
+        klass.send(:traduit, new_options, scope, &block)
+        scopes = [namespace] | scope | [block.call(instance)]
+        expect(backend).to receive(:t).with(key, params.merge(scope: scopes))
+          .and_return(translate_key)
+      end
+
+      it { expect(subject).to eq translate_key }
+    end
+  end
+
   describe '#t(key, options)' do
     let(:klass) { build_translatable_class(options, *scopes, &block) }
     let(:backend) { double(:backend) }
     let(:scopes) { [:foo] }
     let(:block) { ->{} }
-    let(:translate_key) { 'foo.bar' }
-    let(:key) { 'bar' }
-    let(:params) { { key: :value } }
 
     before { described_class.backend = backend }
 

@@ -15,6 +15,7 @@ class Traduit < Module
           mod.options
         end
         klass.send :include, InstanceMethods
+        klass.extend ClassMethods
       end
     end
   end
@@ -30,6 +31,17 @@ class Traduit < Module
 
     def flush
       @backends = {}
+    end
+  end
+
+  module ClassMethods
+    def traduit(*scopes, &block)
+      options = scopes[0].is_a?(Hash) ? scopes.shift : {}
+      options = (options).merge(scope: scopes.flatten.compact, block: block)
+
+      define_singleton_method :__traduit_options__ do
+        options
+      end
     end
   end
 
@@ -62,6 +74,7 @@ class Traduit < Module
 
     def __traduit_block__
       block = self.class.__traduit_options__[:block]
+      return [] unless block
       Array(block.arity > 0 ? block.call(self) : block.call)
     end
   end
