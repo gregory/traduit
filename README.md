@@ -14,7 +14,7 @@ You will need to set 1 or more backends in an initializer
 
 ```ruby
 Traduit.backend = I18n
-Traduit.backend[:db] = I18n, method: :translate
+Traduit.backends[:db] = I18n, method: :translate
 Traduit.backends # => { default: I18n, db: Translation}
 ```
 
