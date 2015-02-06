@@ -105,5 +105,39 @@ describe Traduit do
 
       it { expect(subject).to eq translate_key }
     end
+
+    context 'when scope is passed to t' do
+      let(:namespace) { 'namespace' }
+      let(:options) { { namespace: namespace } }
+      let(:new_scope) { [:new, :scope] }
+      let(:params) { {key: :value, scope: new_scope } }
+
+      before do
+        expect(backend).to receive(:t)
+          .with(key, params.merge(scope: new_scope))
+          .and_return(translate_key)
+      end
+
+      subject { klass.new.t(key, params) }
+
+      it { expect(subject).to eq translate_key }
+    end
+
+    context 'when namespace is passed to t' do
+      let(:namespace) { 'namespace' }
+      let(:options) { { namespace: namespace } }
+      let(:new_namespace) { :awesome }
+      let(:params) { {key: :value } }
+
+      before do
+        expect(backend).to receive(:t)
+          .with(key, params.merge(scope: [new_namespace] | scopes))
+          .and_return(translate_key)
+      end
+
+      subject { klass.new.t(key, ({namespace: new_namespace}).merge(params)) }
+
+      it { expect(subject).to eq translate_key }
+    end
   end
 end

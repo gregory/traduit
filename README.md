@@ -45,7 +45,16 @@ class Foo < BaseWorker
   traduit namespace: :awesome, backend: :db
 
   def perform
-    t(:failed) # => will look at workers.foo.awesome.failed
+    t(:failed) # => will look at awesome.foo.failed
+  end
+end
+
+class Bar < BaseWorker
+  traduit namespace: :awesome, backend: :db
+
+  # We can overwrite the default namespace and the scope
+  def perform
+    t(:failed, namespace: :common, scope: [:new, :scope]) # => will look at common.new.scope.failed
   end
 end
 
@@ -61,7 +70,6 @@ class UsersController < ApiBaseController
   end
 end
 ```
-
 
 ## Contributing
 

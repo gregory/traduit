@@ -47,8 +47,11 @@ class Traduit < Module
 
   module InstanceMethods
     def t(key, options={})
+      namespace = options.delete(:namespace)
+      namespace = namespace.nil? ? __traduit_namespace__ : Array(namespace)
+      block = options[:scope].nil? ? __traduit_block__ : []
       defaults = {
-        scope: (__traduit_namespace__ | __traduit_scope__ | __traduit_block__).flatten.compact
+        scope: (namespace | __traduit_scope__ | block).flatten.compact
       }
       backend = Traduit.backends[__traduit_backend__]
       backend.send(__traduit_method__, key, defaults.merge(options))
